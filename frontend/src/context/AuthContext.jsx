@@ -10,21 +10,16 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check if a user is logged in on a page load
     const checkLoggedIn = async () => {
       try {
         const token = localStorage.getItem("token")
 
         if (token) {
-          // Configure axios to use token in headers
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`
-
-          // Verify token with backend
           const res = await axios.get("/api/auth/verify")
           setUser(res.data.user)
         }
       } catch (err) {
-        // If a token is invalid, clear it
         localStorage.removeItem("token")
         delete axios.defaults.headers.common["Authorization"]
       } finally {
@@ -40,10 +35,8 @@ export const AuthProvider = ({ children }) => {
       const res = await axios.post("/api/auth/login", credentials)
       const { token, user } = res.data
 
-      // Save token to localStorage
       localStorage.setItem("token", token)
 
-      // Set default headers for future requests
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`
 
       setUser(user)
@@ -63,13 +56,10 @@ export const AuthProvider = ({ children }) => {
   }
 
   const logout = () => {
-    // Remove token from localStorage
     localStorage.removeItem("token")
 
-    // Remove authorization header
     delete axios.defaults.headers.common["Authorization"]
 
-    // Clear user from state
     setUser(null)
   }
 

@@ -69,13 +69,10 @@ function CreateExam() {
     }
 
     const validateForm = () => {
-        // Validate exam data
         if (!examData.name || !examData.description || !examData.duration) {
             setError("Please fill in all exam details")
             return false
         }
-
-        // Validate questions
         for (let i = 0; i < questions.length; i++) {
             const q = questions[i]
             if (!q.text) {
@@ -90,7 +87,6 @@ function CreateExam() {
                 }
             }
         }
-
         return true
     }
 

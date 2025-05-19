@@ -16,11 +16,9 @@ function StudentDashboard() {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        // Get available exams
         const availableRes = await axios.get("/api/exams/available")
         setAvailableExams(availableRes.data)
 
-        // Get completed exams for this student
         const completedRes = await axios.get("/api/exams/completed")
         setCompletedExams(completedRes.data)
 

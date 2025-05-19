@@ -45,7 +45,6 @@ function AdminDashboard() {
         active: !currentStatus,
       })
 
-      // Update the local state
       setActiveExams(
           activeExams.map((exam) => {
             if (exam._id === examId) {
@@ -55,7 +54,6 @@ function AdminDashboard() {
           }),
       )
 
-      // If the toggled exam is the selected one, update it
       if (selectedExam && selectedExam._id === examId) {
         setSelectedExam({ ...selectedExam, active: !selectedExam.active })
       }
@@ -64,7 +62,6 @@ function AdminDashboard() {
     }
   }
 
-  // Set up polling for real-time updates
   useEffect(() => {
     if (!selectedExam) return
 
@@ -75,7 +72,7 @@ function AdminDashboard() {
       } catch (err) {
         console.error("Failed to update student data:", err)
       }
-    }, 5000) // Poll every 5 seconds
+    }, 5000) 
 
     return () => clearInterval(interval)
   }, [selectedExam])

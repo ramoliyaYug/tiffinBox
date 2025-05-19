@@ -32,22 +32,17 @@ function ExamView() {
   useEffect(() => {
     const fetchExam = async () => {
       try {
-        // Get exam details
         const examRes = await axios.get(`/api/exams/${id}`)
         setExam(examRes.data)
 
-        // Set initial time (convert minutes to seconds)
         const initialTimeInSeconds = examRes.data.duration * 60
         setTimeLeft(initialTimeInSeconds)
 
-        // Store the start time
         startTimeRef.current = Date.now()
 
-        // Get exam questions
         const questionsRes = await axios.get(`/api/exams/${id}/questions`)
         setQuestions(questionsRes.data)
 
-        // Initialize monitoring session
         await axios.post(`/api/monitoring/start`, { examId: id })
 
         setLoading(false)
@@ -64,14 +59,12 @@ function ExamView() {
 
     fetchExam()
 
-    // Set up tab switching detection
     const handleVisibilityChange = () => {
       if (detectTabSwitching()) {
         handleSuspiciousActivity("Tab switching detected!")
       }
     }
 
-    // Set up app switching detection
     const handleAppSwitch = () => {
       if (detectAppSwitching()) {
         handleSuspiciousActivity("Application switching detected!")
@@ -81,7 +74,6 @@ function ExamView() {
     document.addEventListener("visibilitychange", handleVisibilityChange)
     window.addEventListener("blur", handleAppSwitch)
 
-    // Set up monitoring interval to send status updates to server
     monitoringIntervalRef.current = setInterval(async () => {
       if (!loading && !examCompleted && exam) {
         try {
@@ -95,7 +87,7 @@ function ExamView() {
           console.error("Failed to update monitoring status:", err)
         }
       }
-    }, 10000) // Every 10 seconds
+    }, 10000) 
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange)
@@ -104,7 +96,6 @@ function ExamView() {
       clearTimeout(warningTimeoutRef.current)
       clearInterval(monitoringIntervalRef.current)
 
-      // End monitoring session when component unmounts
       if (!examCompleted && exam) {
         axios
             .post(`/api/monitoring/end`, { examId: id })
@@ -113,21 +104,16 @@ function ExamView() {
     }
   }, [id])
 
-  // Timer effect - completely rewritten for reliability
   useEffect(() => {
-    // Only start the timer when exam is loaded and not completed
     if (!loading && !examCompleted && exam && timeLeft > 0) {
       console.log("Starting timer with", timeLeft, "seconds remaining")
 
-      // Clear any existing timer
       if (timerRef.current) {
         clearInterval(timerRef.current)
       }
 
-      // Start a new timer that ticks every second
       timerRef.current = setInterval(() => {
         setTimeLeft((prevTime) => {
-          // When time is up, clear the interval and submit the exam
           if (prevTime <= 1) {
             clearInterval(timerRef.current)
             handleSubmitExam(false)
@@ -138,13 +124,12 @@ function ExamView() {
       }, 1000)
     }
 
-    // Clean up the timer when component unmounts or dependencies change
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current)
       }
     }
-  }, [loading, examCompleted, exam]) // Only re-run when these dependencies change
+  }, [loading, examCompleted, exam]) 
 
   const handleSuspiciousActivity = async (message) => {
     if (examCompleted) return
@@ -152,16 +137,13 @@ function ExamView() {
     setWarnings((prev) => {
       const newWarnings = prev + 1
 
-      // Show warning message
       setWarningMessage(message)
       setShowWarning(true)
 
-      // Auto-hide warning after 3 seconds
       warningTimeoutRef.current = setTimeout(() => {
         setShowWarning(false)
       }, 3000)
 
-      // Record warning on server
       axios
           .post(`/api/monitoring/warning`, {
             examId: id,
@@ -169,7 +151,6 @@ function ExamView() {
           })
           .catch((err) => console.error("Failed to record warning:", err))
 
-      // Auto-submit after 3 warnings
       if (newWarnings >= 3) {
         handleSubmitExam(true)
       }
@@ -187,7 +168,6 @@ function ExamView() {
         [questionId]: option,
       }
 
-      // Save answer to server
       axios
           .post(`/api/exams/${id}/answer`, {
             questionId,
@@ -215,14 +195,12 @@ function ExamView() {
     if (examCompleted) return
 
     try {
-      // Clear all timers and intervals
       if (timerRef.current) clearInterval(timerRef.current)
       if (monitoringIntervalRef.current) clearInterval(monitoringIntervalRef.current)
       if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current)
 
       setExamCompleted(true)
 
-      // Submit exam to server
       const response = await axios.post(`/api/exams/${id}/submit`, {
         answers,
         forced,

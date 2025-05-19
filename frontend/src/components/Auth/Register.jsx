@@ -18,7 +18,6 @@ function Register() {
   const { register, user } = useContext(AuthContext)
   const navigate = useNavigate()
 
-  // Redirect if already logged in
   if (user) {
     navigate(user.role === "admin" ? "/admin" : "/student")
   }
@@ -28,7 +27,6 @@ function Register() {
     setError("")
     setIsLoading(true)
 
-    // Validation
     if (!name || !email || !password || !confirmPassword) {
       setError("All fields are required")
       setIsLoading(false)
@@ -42,7 +40,6 @@ function Register() {
     }
 
     try {
-      // Log the data being sent to help with debugging
       console.log("Sending registration data:", { name, email, password, role })
 
       const response = await axios.post("/api/auth/register", {
@@ -53,7 +50,7 @@ function Register() {
       })
 
       console.log("Registration response:", response.data)
-      navigate("/") // Redirect to login after successful registration
+      navigate("/") 
     } catch (err) {
       console.error("Registration error:", err)
       setError(err.response?.data?.message || "Registration failed. Please try again.")

@@ -29,12 +29,10 @@ const examSchema = new mongoose.Schema({
     },
 })
 
-// Virtual for question count
 examSchema.virtual("questionCount").get(function () {
     return this.questions ? this.questions.length : 0
 })
 
-// Set virtuals to true when converting to JSON
 examSchema.set("toJSON", { virtuals: true })
 examSchema.set("toObject", { virtuals: true })
 

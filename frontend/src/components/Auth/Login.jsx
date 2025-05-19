@@ -14,7 +14,6 @@ function Login() {
   const { login, user } = useContext(AuthContext)
   const navigate = useNavigate()
 
-  // Redirect if already logged in
   if (user) {
     navigate(user.role === "admin" ? "/admin" : "/student")
   }
@@ -24,7 +23,6 @@ function Login() {
     setError("")
     setIsLoading(true)
 
-    // Simple validation
     if (!email || !password) {
       setError("Please enter both email and password")
       setIsLoading(false)

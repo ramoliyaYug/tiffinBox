@@ -6,14 +6,10 @@ const Question = require("../models/Question")
 const ExamSession = require("../models/ExamSession")
 const mongoose = require("mongoose")
 
-// @route   GET /api/exams
-// @desc    Get all exams (admin only)
-// @access  Private/Admin
 router.get("/", protect, admin, async (req, res) => {
     try {
         const exams = await Exam.find().sort({ createdAt: -1 })
 
-        // Get question count for each exam
         const examsWithQuestionCount = await Promise.all(
             exams.map(async (exam) => {
                 const count = await Question.countDocuments({ examId: exam._id })
@@ -31,15 +27,10 @@ router.get("/", protect, admin, async (req, res) => {
     }
 })
 
-// @route   GET /api/exams/available
-// @desc    Get available exams for students
-// @access  Private/Student
 router.get("/available", protect, student, async (req, res) => {
     try {
-        // Get all active exams
         const exams = await Exam.find({ active: true }).sort({ createdAt: -1 })
 
-        // Get exams that the student has already completed
         const completedSessions = await ExamSession.find({
             userId: req.user._id,
             completed: true,
@@ -47,10 +38,8 @@ router.get("/available", protect, student, async (req, res) => {
 
         const completedExamIds = completedSessions.map((session) => session.examId.toString())
 
-        // Filter out completed exams
         const availableExams = exams.filter((exam) => !completedExamIds.includes(exam._id.toString()))
 
-        // Get question count for each exam
         const examsWithQuestionCount = await Promise.all(
             availableExams.map(async (exam) => {
                 const count = await Question.countDocuments({ examId: exam._id })
@@ -68,18 +57,14 @@ router.get("/available", protect, student, async (req, res) => {
     }
 })
 
-// @route   GET /api/exams/completed
-// @desc    Get completed exams for a student
-// @access  Private/Student
 router.get("/completed", protect, student, async (req, res) => {
     try {
-        // Get all completed exam sessions for this student
+
         const completedSessions = await ExamSession.find({
             userId: req.user._id,
             completed: true,
         }).sort({ endTime: -1 })
 
-        // Get exam details for each session
         const completedExams = await Promise.all(
             completedSessions.map(async (session) => {
                 const exam = await Exam.findById(session.examId)
@@ -101,9 +86,6 @@ router.get("/completed", protect, student, async (req, res) => {
     }
 })
 
-// @route   POST /api/exams
-// @desc    Create a new exam
-// @access  Private/Admin
 router.post("/", protect, admin, async (req, res) => {
     const session = await mongoose.startSession()
     session.startTransaction()
@@ -111,7 +93,6 @@ router.post("/", protect, admin, async (req, res) => {
     try {
         const { name, description, duration, questions } = req.body
 
-        // Validate input
         if (!name || !description || !duration) {
             return res.status(400).json({ message: "Please provide all required exam fields" })
         }
@@ -120,7 +101,6 @@ router.post("/", protect, admin, async (req, res) => {
             return res.status(400).json({ message: "Please provide at least one question" })
         }
 
-        // Create exam
         const exam = await Exam.create(
             [
                 {
@@ -128,19 +108,18 @@ router.post("/", protect, admin, async (req, res) => {
                     description,
                     duration,
                     createdBy: req.user._id,
-                    active: true, // Default to active
+                    active: true, 
                 },
             ],
             { session },
         )
 
-        // Create questions
         const questionDocs = questions.map((q) => ({
             examId: exam[0]._id,
             text: q.text,
             options: q.options,
             correctAnswer: q.correctAnswer,
-            points: q.points || 1, // Default to 1 point if not specified
+            points: q.points || 1, 
         }))
 
         await Question.insertMany(questionDocs, { session })
@@ -164,9 +143,6 @@ router.post("/", protect, admin, async (req, res) => {
     }
 })
 
-// @route   GET /api/exams/:id
-// @desc    Get exam by ID
-// @access  Private
 router.get("/:id", protect, async (req, res) => {
     try {
         const exam = await Exam.findById(req.params.id)
@@ -175,12 +151,10 @@ router.get("/:id", protect, async (req, res) => {
             return res.status(404).json({ message: "Exam not found" })
         }
 
-        // Check if user is admin or if exam is active for students
         if (req.user.role !== "admin" && !exam.active) {
             return res.status(403).json({ message: "Exam is not available" })
         }
 
-        // Get question count
         const questionCount = await Question.countDocuments({ examId: exam._id })
 
         res.json({
@@ -193,9 +167,6 @@ router.get("/:id", protect, async (req, res) => {
     }
 })
 
-// @route   GET /api/exams/:id/questions
-// @desc    Get questions for an exam
-// @access  Private
 router.get("/:id/questions", protect, async (req, res) => {
     try {
         const exam = await Exam.findById(req.params.id)
@@ -204,14 +175,11 @@ router.get("/:id/questions", protect, async (req, res) => {
             return res.status(404).json({ message: "Exam not found" })
         }
 
-        // Check if user is admin or if exam is active for students
         if (req.user.role !== "admin" && !exam.active) {
             return res.status(403).json({ message: "Exam is not available" })
         }
 
-        // For students, check if they have an active session or have already completed this exam
         if (req.user.role === "student") {
-            // Check if student has already completed this exam
             const completedSession = await ExamSession.findOne({
                 userId: req.user._id,
                 examId: exam._id,
@@ -222,7 +190,6 @@ router.get("/:id/questions", protect, async (req, res) => {
                 return res.status(403).json({ message: "You have already completed this exam" })
             }
 
-            // Check for active session or create one
             const session = await ExamSession.findOne({
                 userId: req.user._id,
                 examId: exam._id,
@@ -230,7 +197,6 @@ router.get("/:id/questions", protect, async (req, res) => {
             })
 
             if (!session) {
-                // Create a new session for this student
                 await ExamSession.create({
                     userId: req.user._id,
                     examId: exam._id,
@@ -239,10 +205,8 @@ router.get("/:id/questions", protect, async (req, res) => {
             }
         }
 
-        // Get questions for the exam
         const questions = await Question.find({ examId: exam._id })
 
-        // For students, don't include correct answers
         if (req.user.role === "student") {
             const questionsWithoutAnswers = questions.map((q) => ({
                 _id: q._id,
@@ -261,14 +225,10 @@ router.get("/:id/questions", protect, async (req, res) => {
     }
 })
 
-// @route   POST /api/exams/:id/answer
-// @desc    Save a student's answer for a question
-// @access  Private/Student
 router.post("/:id/answer", protect, student, async (req, res) => {
     try {
         const { questionId, answer } = req.body
 
-        // Find active session
         const session = await ExamSession.findOne({
             userId: req.user._id,
             examId: req.params.id,
@@ -279,7 +239,6 @@ router.post("/:id/answer", protect, student, async (req, res) => {
             return res.status(404).json({ message: "No active exam session found" })
         }
 
-        // Update the answer in the session
         session.answers.set(questionId, answer)
         await session.save()
 
@@ -290,14 +249,10 @@ router.post("/:id/answer", protect, student, async (req, res) => {
     }
 })
 
-// @route   POST /api/exams/:id/submit
-// @desc    Submit an exam
-// @access  Private/Student
 router.post("/:id/submit", protect, student, async (req, res) => {
     try {
         const { forced, warnings } = req.body
 
-        // Find active session
         const session = await ExamSession.findOne({
             userId: req.user._id,
             examId: req.params.id,
@@ -308,10 +263,8 @@ router.post("/:id/submit", protect, student, async (req, res) => {
             return res.status(404).json({ message: "No active exam session found" })
         }
 
-        // Get all questions for this exam
         const questions = await Question.find({ examId: req.params.id })
 
-        // Calculate score
         let score = 0
         let totalPoints = 0
 
@@ -324,10 +277,8 @@ router.post("/:id/submit", protect, student, async (req, res) => {
             }
         })
 
-        // Convert to percentage
         const scorePercentage = totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 0
 
-        // Update session
         session.completed = true
         session.endTime = Date.now()
         session.forcedSubmission = !!forced
@@ -346,9 +297,6 @@ router.post("/:id/submit", protect, student, async (req, res) => {
     }
 })
 
-// @route   PUT /api/exams/:id
-// @desc    Update an exam
-// @access  Private/Admin
 router.put("/:id", protect, admin, async (req, res) => {
     try {
         const { name, description, duration, active } = req.body
@@ -374,9 +322,6 @@ router.put("/:id", protect, admin, async (req, res) => {
     }
 })
 
-// @route   DELETE /api/exams/:id
-// @desc    Delete an exam
-// @access  Private/Admin
 router.delete("/:id", protect, admin, async (req, res) => {
     const session = await mongoose.startSession()
     session.startTransaction()
@@ -388,7 +333,6 @@ router.delete("/:id", protect, admin, async (req, res) => {
             return res.status(404).json({ message: "Exam not found" })
         }
 
-        // Delete exam, questions, and sessions
         await Question.deleteMany({ examId: exam._id }, { session })
         await ExamSession.deleteMany({ examId: exam._id }, { session })
         await Exam.deleteOne({ _id: exam._id }, { session })

@@ -3,13 +3,10 @@ import ReactDOM from "react-dom/client"
 import axios from "axios"
 import App from "./App"
 
-// Set base URL for all axios requests
-axios.defaults.baseURL = "http://localhost:5000"
+axios.defaults.baseURL = "http://localhost:5001"
 
-// Enable credentials for cross-origin requests
 axios.defaults.withCredentials = true
 
-// Add request/response interceptors for better debugging
 axios.interceptors.request.use(
     (config) => {
         console.log("API Request:", config.method.toUpperCase(), config.url, config.data)
@@ -32,7 +29,6 @@ axios.interceptors.response.use(
     },
 )
 
-// Add token to requests if it exists
 const token = localStorage.getItem("token")
 if (token) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`

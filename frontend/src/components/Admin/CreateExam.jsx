@@ -3,7 +3,8 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
-import "../../styles/Admin.css"
+import { FaPlus, FaMinus, FaClock, FaQuestionCircle, FaCheck, FaTimes, FaArrowLeft } from "react-icons/fa"
+import "../../styles/CreateExam.css"
 
 function CreateExam() {
     const navigate = useNavigate()
@@ -102,7 +103,7 @@ function CreateExam() {
         setIsLoading(true)
 
         try {
-            const response = await axios.post("/api/exams", {
+            await axios.post("/api/exams", {
                 ...examData,
                 questions,
             })
@@ -152,7 +153,7 @@ function CreateExam() {
                     </div>
 
                     <div className="form-group">
-                        <label>Duration (minutes)</label>
+                        <label><FaClock /> Duration (minutes)</label>
                         <input
                             type="number"
                             name="duration"
@@ -169,14 +170,14 @@ function CreateExam() {
                     {questions.map((question, qIndex) => (
                         <div key={qIndex} className="question-card">
                             <div className="question-header">
-                                <h4>Question {qIndex + 1}</h4>
+                                <h4><FaQuestionCircle /> Question {qIndex + 1}</h4>
                                 <button
                                     type="button"
                                     className="remove-question-btn"
                                     onClick={() => removeQuestion(qIndex)}
                                     disabled={questions.length === 1 || isLoading}
                                 >
-                                    Remove
+                                    <FaMinus /> Remove
                                 </button>
                             </div>
 
@@ -215,16 +216,20 @@ function CreateExam() {
                     ))}
 
                     <button type="button" className="add-question-btn" onClick={addQuestion} disabled={isLoading}>
-                        Add Question
+                        <FaPlus /> Add Question
                     </button>
                 </div>
 
                 <div className="form-actions">
                     <button type="button" className="cancel-btn" onClick={() => navigate("/admin")} disabled={isLoading}>
-                        Cancel
+                        <FaArrowLeft /> Cancel
                     </button>
                     <button type="submit" className="submit-btn" disabled={isLoading}>
-                        {isLoading ? "Creating..." : "Create Exam"}
+                        {isLoading ? (
+                            <>Creating...</>
+                        ) : (
+                            <><FaCheck /> Create Exam</>
+                        )}
                     </button>
                 </div>
             </form>

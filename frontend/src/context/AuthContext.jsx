@@ -3,6 +3,8 @@
 import { createContext, useState, useEffect } from "react"
 import axios from "axios"
 
+axios.defaults.baseURL = 'http://localhost:5005';
+
 export const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
@@ -36,9 +38,7 @@ export const AuthProvider = ({ children }) => {
       const { token, user } = res.data
 
       localStorage.setItem("token", token)
-
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`
-
       setUser(user)
       return user
     } catch (err) {
@@ -57,11 +57,13 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem("token")
-
     delete axios.defaults.headers.common["Authorization"]
-
     setUser(null)
   }
 
-  return <AuthContext.Provider value={{ user, loading, login, register, logout }}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }

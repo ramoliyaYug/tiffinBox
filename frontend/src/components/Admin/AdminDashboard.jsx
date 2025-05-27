@@ -4,7 +4,8 @@ import { useState, useEffect, useContext } from "react"
 import { Link } from "react-router-dom"
 import axios from "axios"
 import { AuthContext } from "../../context/AuthContext"
-import "../../styles/Admin.css"
+import { FaPlus, FaUserGraduate, FaClock, FaCircle, FaExclamationTriangle, FaSignOutAlt } from "react-icons/fa"
+import "../../styles/AdminDashboard.css"
 
 function AdminDashboard() {
   const { user, logout } = useContext(AuthContext)
@@ -88,7 +89,7 @@ function AdminDashboard() {
           <div className="user-info">
             <span>Welcome, {user.name}</span>
             <button onClick={logout} className="logout-button">
-              Logout
+              <FaSignOutAlt /> Logout
             </button>
           </div>
         </header>
@@ -97,7 +98,7 @@ function AdminDashboard() {
 
         <div className="admin-actions">
           <Link to="/admin/create-exam" className="create-exam-btn">
-            Create New Exam
+            <FaPlus /> Create New Exam
           </Link>
         </div>
 
@@ -117,7 +118,9 @@ function AdminDashboard() {
                       >
                         <div className="exam-item" onClick={() => handleExamSelect(exam)}>
                           <span className="exam-name">{exam.name}</span>
-                          <span className="exam-time">{exam.duration} mins</span>
+                          <span className="exam-time">
+                            <FaClock /> {exam.duration} mins
+                          </span>
                         </div>
                         <div className="exam-actions">
                           <button
@@ -127,7 +130,7 @@ function AdminDashboard() {
                                 toggleExamStatus(exam._id, exam.active)
                               }}
                           >
-                            {exam.active ? "Active" : "Inactive"}
+                            <FaCircle /> {exam.active ? "Active" : "Inactive"}
                           </button>
                         </div>
                       </li>
@@ -142,10 +145,10 @@ function AdminDashboard() {
             {selectedExam && (
                 <div className="students-list">
                   <div className="student-row header">
-                    <span>Student</span>
+                    <span><FaUserGraduate /> Student</span>
                     <span>Status</span>
-                    <span>Warnings</span>
-                    <span>Time Left</span>
+                    <span><FaExclamationTriangle /> Warnings</span>
+                    <span><FaClock /> Time Left</span>
                   </div>
 
                   {activeStudents.length === 0 ? (

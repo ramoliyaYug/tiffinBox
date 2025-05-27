@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import axios from "axios"
 import { AuthContext } from "../../context/AuthContext"
 import { detectTabSwitching, detectAppSwitching } from "../../utils/monitoring"
+import { FaClock, FaExclamationTriangle, FaArrowLeft, FaArrowRight, FaPaperPlane, FaCheck, FaHome, FaQuestionCircle } from "react-icons/fa"
 import "../../styles/Exam.css"
 
 function ExamView() {
@@ -227,24 +228,24 @@ function ExamView() {
 
   if (examCompleted) {
     return (
-        <div className="exam-completed">
-          <h2>Exam Completed</h2>
-          <p>You have already completed this exam.</p>
-          <button onClick={() => navigate("/student")} className="return-button">
-            Return to Dashboard
-          </button>
-        </div>
+      <div className="exam-completed">
+        <h2><FaCheck /> Exam Completed</h2>
+        <p>You have already completed this exam.</p>
+        <button onClick={() => navigate("/student")} className="return-button">
+          <FaHome /> Return to Dashboard
+        </button>
+      </div>
     )
   }
 
   if (error) {
     return (
-        <div className="error-container">
-          <div className="error-message">{error}</div>
-          <button onClick={() => navigate("/student")} className="return-button">
-            Return to Dashboard
-          </button>
-        </div>
+      <div className="error-container">
+        <div className="error-message">{error}</div>
+        <button onClick={() => navigate("/student")} className="return-button">
+          <FaHome /> Return to Dashboard
+        </button>
+      </div>
     )
   }
 
@@ -255,65 +256,67 @@ function ExamView() {
   const question = questions[currentQuestion]
 
   return (
-      <div className="exam-view">
-        <header className="exam-header">
-          <h1>{exam.name}</h1>
-          <div className="exam-info">
-            <div className="timer" data-testid="exam-timer">
-              Time Left: {formatTime(timeLeft)}
-            </div>
-            <div className="warnings">Warnings: {warnings}/3</div>
+    <div className="exam-view">
+      <header className="exam-header">
+        <h1>{exam.name}</h1>
+        <div className="exam-info">
+          <div className="timer" data-testid="exam-timer">
+            <FaClock /> {formatTime(timeLeft)}
           </div>
-        </header>
-
-        {showWarning && (
-            <div className="warning-popup">
-              <div className="warning-content">
-                <h3>Warning!</h3>
-                <p>{warningMessage}</p>
-                <p>Warning {warnings}/3</p>
-              </div>
-            </div>
-        )}
-
-        <div className="question-container">
-          <div className="question-number">
-            Question {currentQuestion + 1} of {questions.length}
-          </div>
-
-          <div className="question">
-            <h3>{question.text}</h3>
-            <div className="options">
-              {question.options.map((option, index) => (
-                  <div
-                      key={index}
-                      className={`option ${answers[question._id] === index ? "selected" : ""}`}
-                      onClick={() => handleAnswerSelect(question._id, index)}
-                  >
-                    <span className="option-label">{String.fromCharCode(65 + index)}</span>
-                    <span className="option-text">{option}</span>
-                  </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="navigation">
-            <button onClick={handlePrevQuestion} disabled={currentQuestion === 0} className="nav-button">
-              Previous
-            </button>
-
-            {currentQuestion < questions.length - 1 ? (
-                <button onClick={handleNextQuestion} className="nav-button">
-                  Next
-                </button>
-            ) : (
-                <button onClick={() => handleSubmitExam(false)} className="submit-button">
-                  Submit Exam
-                </button>
-            )}
+          <div className="warnings">
+            <FaExclamationTriangle /> {warnings}/3
           </div>
         </div>
+      </header>
+
+      {showWarning && (
+        <div className="warning-popup">
+          <div className="warning-content">
+            <h3><FaExclamationTriangle /> Warning!</h3>
+            <p>{warningMessage}</p>
+            <p>Warning {warnings}/3</p>
+          </div>
+        </div>
+      )}
+
+      <div className="question-container">
+        <div className="question-number">
+          <FaQuestionCircle /> Question {currentQuestion + 1} of {questions.length}
+        </div>
+
+        <div className="question">
+          <h3>{question.text}</h3>
+          <div className="options">
+            {question.options.map((option, index) => (
+              <div
+                key={index}
+                className={`option ${answers[question._id] === index ? "selected" : ""}`}
+                onClick={() => handleAnswerSelect(question._id, index)}
+              >
+                <span className="option-label">{String.fromCharCode(65 + index)}</span>
+                <span className="option-text">{option}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="navigation">
+          <button onClick={handlePrevQuestion} disabled={currentQuestion === 0} className="nav-button">
+            <FaArrowLeft /> Previous
+          </button>
+
+          {currentQuestion < questions.length - 1 ? (
+            <button onClick={handleNextQuestion} className="nav-button">
+              Next <FaArrowRight />
+            </button>
+          ) : (
+            <button onClick={() => handleSubmitExam(false)} className="submit-button">
+              <FaPaperPlane /> Submit Exam
+            </button>
+          )}
+        </div>
       </div>
+    </div>
   )
 }
 

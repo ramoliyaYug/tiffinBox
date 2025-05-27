@@ -52,7 +52,7 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
     try {
-        const { email, password } = req.body
+        const { email, password, role } = req.body
 
         const user = await User.findOne({ email }).select("+password")
         if (!user) {
@@ -62,6 +62,12 @@ router.post("/login", async (req, res) => {
         const isMatch = await user.matchPassword(password)
         if (!isMatch) {
             return res.status(401).json({ message: "Invalid credentials" })
+        }
+
+        if (role && user.role !== role) {
+            return res.status(403).json({ 
+                message: `Invalid credentials for ${role} login. Please use the correct login section.`
+            })
         }
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {

@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client"
 import axios from "axios"
 import App from "./App"
 
-axios.defaults.baseURL = "http://localhost:5001"
+axios.defaults.baseURL = "https://tiffinbox-sqem.onrender.com"
 
 axios.defaults.withCredentials = true
 

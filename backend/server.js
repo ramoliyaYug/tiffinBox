@@ -15,7 +15,7 @@ const monitoringRoutes = require("./routes/monitoring")
 const app = express()
 app.use(
     cors({
-        origin: ["http://localhost:3000", "http://localhost:5173"], 
+        origin: ["http://localhost:5173", "https://tiffinbox-frontend.vercel.app/", "tiffinbox-frontend-git-main-ramoliyayug55-5861s-projects.vercel.app"], 
         credentials: true,
     }),
 )
